@@ -117,17 +117,24 @@ public class PlayerController : MonoBehaviour
 
     //SPAWN RETURN
 
-    // checks if Hank actually collides with another object
+    // checks when Hank's Character Controller hits something
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        // checks if Hank touched the floor
-        if (hit.gameObject.name == "floor")
-        {
-            // move Hank back to the spawn point
-            transform.position = spawnPoint.position;
+        // looks for an Enemy script on whatever Hank hit
+        Enemy enemy = hit.collider.GetComponentInParent<Enemy>();
 
-            // reset falling speed
-            verticalVelocity = 0f;
+        // checks if Hank actually hit an enemy
+        if (enemy != null)
+        {
+            // checks if Hank is falling
+            if (verticalVelocity < 0)
+            {
+                // Hank jumped on the enemy
+                enemy.Defeat();
+
+                // makes Hank bounce after landing on the enemy
+                verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            }
         }
     }
 }
