@@ -5,6 +5,9 @@ public class Enemy : MonoBehaviour
     // how many points Hank gets
     public int points = 100;
 
+    // metal crunch sound
+    public AudioClip metalSmash;
+
     // stops the enemy being defeated more than once
     private bool defeated = false;
 
@@ -19,6 +22,9 @@ public class Enemy : MonoBehaviour
 
         // enemy has been defeated
         defeated = true;
+
+        // play metal crunch sound
+        AudioSource.PlayClipAtPoint(metalSmash, transform.position);
 
         // add points to Hank's score
         ScoreManager.score += points;
