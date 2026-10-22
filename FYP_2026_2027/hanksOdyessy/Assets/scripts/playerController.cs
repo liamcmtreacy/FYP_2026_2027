@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -26,6 +27,9 @@ public class PlayerController : MonoBehaviour
     // keeps track of looking up and down
     private float cameraRotation = 0f;
 
+    // This stores the camera that follows behind Hank.
+    public Transform playerCamera;
+
 
     void Start()
     {
@@ -35,8 +39,40 @@ public class PlayerController : MonoBehaviour
         // makes sure the Character Controller is turned on
         controller.enabled = true;
 
+        //Puts Hank at the spawn point when the game starts
+        if (spawnPoint != null)
+        {
+        controller.enabled = false;
+        transform.position = spawnPoint.position;
+        transform.rotation = spawnPoint.rotation;
+        controller.enabled = true;
+        }
+
         // locks the mouse to the middle of the screen
         Cursor.lockState = CursorLockMode.Locked;
+
+        // Finds Main Camera underneath Player if it hasn't been// assigned in the Inspector.
+        if (playerCamera == null)
+        {
+            Camera childCamera = GetComponentInChildren<Camera>();
+
+            if (childCamera != null)
+            {
+                playerCamera = childCamera.transform;
+            }
+        }
+
+        // starts the camera with its current up/down angle (feels kinda cinematic to me)
+        if (playerCamera != null)
+        {
+            cameraRotation = playerCamera.localEulerAngles.x;
+
+            // converts the angle to a value between -180 and 180
+            if (cameraRotation > 180f)
+            {
+                cameraRotation -= 360f;
+            }
+        }
     }
 
 
@@ -57,6 +93,9 @@ public class PlayerController : MonoBehaviour
         // moves Hank forwards, backwards and sideways
         Vector3 movement = transform.right * x + transform.forward * z;
 
+        // stops Hank moving faster diagonally
+        movement = Vector3.ClampMagnitude(movement, 1f);
+
 
         //JUMPING
 
@@ -64,9 +103,9 @@ public class PlayerController : MonoBehaviour
         if (controller.isGrounded)
         {
             // keeps Hank on the ground
-            if (verticalVelocity < 0)
+            if (verticalVelocity < 0f)
             {
-                verticalVelocity = -2f;
+                verticalVelocity = -1f; // 2 caused issues so changed to 1
             }
 
             // Space makes Hank jump
@@ -75,9 +114,11 @@ public class PlayerController : MonoBehaviour
                 verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
             }
         }
-
-        // gravity (wow)
-        verticalVelocity += gravity * Time.deltaTime;
+        else
+        {
+            // gravity pulls Hank down while he is in the air
+            verticalVelocity += gravity * Time.deltaTime;
+        }
 
 
         //APPLY MOVEMENT
@@ -90,28 +131,31 @@ public class PlayerController : MonoBehaviour
         // moves Hank
         controller.Move(finalMovement * Time.deltaTime);
 
-
-        //MOUSE FOLLOWING/TRACKING
+        // The mouse rotates Hank left and right, and rotates the
+        // child camera up and down.
+        // MOUSE FOLLOWING/TRACKING
 
         // looks left and right
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
 
-        transform.Rotate(Vector3.up * mouseX);
-
         // looks up and down
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
 
+        // rotates Hank left and right
+        transform.Rotate(Vector3.up * mouseX);
+
+        // changes the up and down camera angle
         cameraRotation -= mouseY;
 
-        // stops Hank from looking completely upside down
+        // stops the camera looking completely upside down
         cameraRotation = Mathf.Clamp(cameraRotation, -80f, 80f);
 
-        transform.localRotation =
-            Quaternion.Euler(
-                cameraRotation,
-                transform.localEulerAngles.y,
-                0f
-            );
+        // rotates the camera up and down
+        if (playerCamera != null)
+        {
+            playerCamera.localRotation =
+                Quaternion.Euler(cameraRotation, 0f, 0f);
+        }
     }
 
 
@@ -126,8 +170,8 @@ public class PlayerController : MonoBehaviour
         // checks if Hank actually hit an enemy
         if (enemy != null)
         {
-            // checks if Hank is falling
-            if (verticalVelocity < 0)
+            // checks if Hank is falling and hitting the top of the enemy
+            if (verticalVelocity < 0f && hit.normal.y > 0.5f)
             {
                 // Hank jumped on the enemy
                 enemy.Defeat();
@@ -136,5 +180,27 @@ public class PlayerController : MonoBehaviour
                 verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
             }
         }
+    }
+
+    // RESPAWN HANK (caused many problems)
+    public void Respawn()
+    {
+        // checks that the spawn point exists
+        if (spawnPoint == null)
+        {
+            Debug.LogWarning("SpawnPoint has not been assigned!");
+            return;
+        }
+
+        // stops the Character Controller while moving Hank
+        controller.enabled = false;
+
+        // moves Hank back to the spawn point
+        transform.position = spawnPoint.position;
+        transform.rotation = spawnPoint.rotation;
+        verticalVelocity = 0f;
+
+        // turns the controller back on
+        controller.enabled = true;
     }
 }
