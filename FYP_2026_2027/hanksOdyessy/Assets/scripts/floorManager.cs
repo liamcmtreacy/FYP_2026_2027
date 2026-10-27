@@ -6,23 +6,6 @@ public class floorManager : MonoBehaviour
 {
     // finds Hank's movement script
     private PlayerController player;
-
-    // checks if Hank touches the ground
-    void OnTriggerEnter(Collider other) // had to rework this
-    {
-        if (other.CompareTag("Player"))
-        {
-            // Hank dies (rip)
-            player = other.GetComponentInParent<PlayerController>();
-
-            // sends Hank back to the spawn point
-            if (player != null)
-            {
-                player.Respawn();
-            }
-        }
-    }
-
     void Update()
     {
         // press R to retry
