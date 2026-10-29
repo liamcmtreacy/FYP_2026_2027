@@ -8,12 +8,12 @@ public class trashcanlidPickUp : MonoBehaviour
     void Start()
     {
         // hides the lid hank is holding when game begins
-        trashCanLid_equipped.SetActive(true);
+        trashCanLid_equipped.SetActive(false);
     }
 
     void Update()
     {
-    }
+    }// left blankS
 
     private void OnTriggerStay(Collider other)
     {
@@ -24,7 +24,7 @@ public class trashcanlidPickUp : MonoBehaviour
             // will check with Muhammed which he prefers
             {
                 this.gameObject.SetActive(false);
-                trashCanLid_equipped.SetActive(true);
+                trashCanLid_equipped.SetActive(false);
             }
         }
     }
