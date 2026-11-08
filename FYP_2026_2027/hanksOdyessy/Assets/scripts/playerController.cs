@@ -1,6 +1,4 @@
-
 using UnityEngine;
-
 public class PlayerController : MonoBehaviour
 {
     // how fast Hank moves
@@ -30,11 +28,28 @@ public class PlayerController : MonoBehaviour
     // This stores the camera that follows behind Hank.
     public Transform playerCamera;
 
+    // NEW ADDITIONS 
+    // These are for enemy knockback
+    public float knockbackForce = 8f; 
+
+    // how fast you recover from the KNOCKBACK
+    public float knockbackRecovery = 10f; 
+
+    public float damageCooldown = 1f;
+
+    //KNOCKBACK MOVEMENT
+    private Vector3 knockbackVelocity; // Knockback Movement
+
+    private float nextDamageTime; 
+
+    private PlayerHealthManager playerHealth; // from playerHealthmanaegr scipt i made
+
 
     void Start()
     {
         // gets the Character Controller attached to Hank
         controller = GetComponent<CharacterController>();
+        playerHealth = GetComponentInChildren<PlayerHealthManager>();
 
         // makes sure the Character Controller is turned on
         controller.enabled = true;
@@ -91,12 +106,11 @@ public class PlayerController : MonoBehaviour
         float z = Input.GetAxis("Vertical");
 
         // moves Hank forwards, backwards and sideways
+        // moves Hank forwards, backwards and sideways
         Vector3 movement = transform.right * x + transform.forward * z;
 
         // stops Hank moving faster diagonally
-        movement = Vector3.ClampMagnitude(movement, 1f);
-
-
+        movement = Vector3.ClampMagnitude(movement, 1f); // weirdly kept running into this issue
         //JUMPING
 
         // checks if Hank is standing on something
@@ -122,10 +136,14 @@ public class PlayerController : MonoBehaviour
 
 
         //APPLY MOVEMENT
-
         Vector3 finalMovement = movement * speed;
 
-        // adds jumping/falling to the movement
+        // Adds KNOCKBACK Movement
+        knockbackVelocity = Vector3.MoveTowards(knockbackVelocity, Vector3.zero,knockbackRecovery * Time.deltaTime);
+
+        finalMovement += knockbackVelocity;
+
+        // Adds jumping/falling to the movement
         finalMovement.y = verticalVelocity;
 
         // moves Hank
@@ -153,35 +171,55 @@ public class PlayerController : MonoBehaviour
         // rotates the camera up and down
         if (playerCamera != null)
         {
-            playerCamera.localRotation =
-                Quaternion.Euler(cameraRotation, 0f, 0f);
+            playerCamera.localRotation = Quaternion.Euler(cameraRotation, 0f, 0f);
         }
     }
 
 
     //SPAWN RETURN
 
-    // checks when Hank's Character Controller hits something
+        // ENEMY COLLISION
+
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        // looks for an Enemy script on whatever Hank hit
+        // Looks for an Enemy script on whatever Hank hit
         Enemy enemy = hit.collider.GetComponentInParent<Enemy>();
 
-        // checks if Hank actually hit an enemy
+        // Checks if Hank actually hit an enemy
         if (enemy != null)
         {
-            // checks if Hank is falling and hitting the top of the enemy
+            // Checks if Hank is falling and hitting the top of the enemy
             if (verticalVelocity < 0f && hit.normal.y > 0.5f)
             {
                 // Hank jumped on the enemy
                 enemy.Defeat();
 
-                // makes Hank bounce after landing on the enemy
+                // Makes Hank bounce after landing on the enemy
                 verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            }
+            else if (Time.time >= nextDamageTime)
+            {
+                // Hank Takes Damage
+                if (playerHealth != null)
+                {
+                    playerHealth.TakeDamage(1f);
+                }
+
+                // Calculates Knockback Direction
+                Vector3 knockbackDirection = transform.position - enemy.transform.position;
+
+                knockbackDirection.y = 0f;
+
+                knockbackDirection.Normalize();
+
+                // Pushes Hank Away From Enemy
+                knockbackVelocity = knockbackDirection * knockbackForce;
+
+                // Sets Damage Cooldown
+                nextDamageTime = Time.time + damageCooldown;
             }
         }
     }
-
     // RESPAWN HANK (caused many problems)
     public void Respawn()
     {
