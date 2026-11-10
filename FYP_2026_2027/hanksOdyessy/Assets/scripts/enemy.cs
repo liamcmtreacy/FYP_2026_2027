@@ -4,6 +4,7 @@ public class Enemy : MonoBehaviour
 {
     // how many points Hank gets
     public int points = 100;
+    public int health = 2; // how many hits to defeat
 
     // metal crunch sound
     public AudioClip metalSmash;
@@ -47,6 +48,21 @@ public class Enemy : MonoBehaviour
             }
         }
     }
+
+    // Takes damage from the sword
+    public void TakeSwordDamage(int damage)
+    {
+        if (defeated) return;
+
+        health -= damage;
+
+        // Defeats enemy when health reaches zero
+        if (health <= 0)
+        {
+            Defeat();
+        }
+        }
+
     public void Defeat()
     {
         // don't give points more than once

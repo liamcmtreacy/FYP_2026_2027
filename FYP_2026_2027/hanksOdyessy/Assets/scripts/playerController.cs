@@ -96,10 +96,10 @@ public class PlayerController : MonoBehaviour
         //MOVEMENT FOR HANK
 
         // makes sure the Character Controller is active
-        if (!controller.enabled)
-        {
-            controller.enabled = true;
-        }
+        //if (!controller.enabled)
+        //{
+            //controller.enabled = true;
+        //}
 
         // gets WASD movement
         float x = Input.GetAxis("Horizontal");
