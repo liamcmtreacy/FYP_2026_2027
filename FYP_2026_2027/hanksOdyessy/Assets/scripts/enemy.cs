@@ -1,86 +1,98 @@
-using UnityEngine;
-
+using UnityEngine; // got a full going over
 public class Enemy : MonoBehaviour
 {
-    // how many points Hank gets
-    public int points = 100;
+    public int points = 100; // how many points Hank gets
     public int health = 2; // how many hits to defeat
 
-    // metal crunch sound
-    public AudioClip metalSmash;
+    public AudioClip metalSmash; // metal crunch sound
 
-    // stops the enemy being defeated more than once
-    private bool defeated = false;
+    private bool defeated = false; // stops the enemy being defeated more than once
 
-    // the player Hank
-    public Transform player;// THIS IS NEEDED SO HE CAN BE FOLLWOED
+    public Transform player; // the player Hank
 
-    // how fast the enemy moves
-    public float speed = 3f;
+    public float speed = 3f; // how fast the enemy moves
+    public float stoppingDistance = 1.5f; // how close the enemy needs to be to Hank
+    public float rotationSpeed = 360f; // how quickly the enemy turns towards Hank
 
-    // how close the enemy needs to be to Hank
-    public float stoppingDistance = 1.5f;
-
-    // Update was originally deelted, but I added it back because I want the enemy to be looking for hank every frame
-     void Update()
+    void Start()
     {
-        // makes the enemy follow Hank
-        if (player != null)
+        // automatically finds Hank if no player has been assigned
+        if (player == null)
         {
-            // checks how far away Hank is
-            float distance = Vector3.Distance(transform.position, player.position);
+            GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
 
-            // moves towards Hank if he is far enough away
-            if (distance > stoppingDistance)
+            if (playerObject != null)
             {
-                Vector3 direction = (player.position - transform.position).normalized;
-
-                // keeps the enemy moving on the ground
-                direction.y = 0;
-
-                transform.position += direction * speed * Time.deltaTime;
-
-                // turns the enemy towards Hank
-                if (direction != Vector3.zero)
-                {
-                    transform.rotation = Quaternion.LookRotation(direction);
-                }
+                player = playerObject.transform;
             }
         }
     }
 
-    // Takes damage from the sword
+    
+    void Update() // this got a big update // its kinda more advanced, or at least looks more?
+    {   // with actual animations and not placeholders prob be more impressive
+    // stops the enemy moving if it has been defeated or Hank cannot be found
+    if (defeated || player == null) return;
+
+    // calculates the direction towards Hank
+    Vector3 direction = player.position - transform.position;
+    direction.y = 0f; // keeps the enemy facing Hank on the ground
+
+    float distance = direction.magnitude;
+
+    // makes sure the enemy has a direction to face
+    if (direction.sqrMagnitude > 0.001f)
+    {
+        direction.Normalize();
+
+        // smoothly turns the enemy towards Hank and stops when facing him
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+
+        transform.rotation = Quaternion.RotateTowards(
+            transform.rotation,
+            targetRotation,
+            rotationSpeed * Time.deltaTime
+        );
+    }
+
+    // chases Hank until the enemy reaches its stopping distance
+    if (distance > stoppingDistance)
+    {
+        transform.position += direction * speed * Time.deltaTime;
+    }
+    }   
+
+
+    // takes damage from the sword
     public void TakeSwordDamage(int damage)
     {
-        if (defeated) return;
+        // ignores damage if the enemy is defeated or the damage is invalid
+        if (defeated || damage <= 0) return;
 
-        health -= damage;
+        health -= damage; // removes health from the enemy
 
-        // Defeats enemy when health reaches zero
+        // defeats enemy when health reaches zero
         if (health <= 0)
         {
             Defeat();
         }
-        }
+    }
 
     public void Defeat()
     {
-        // don't give points more than once
-        if (defeated)
+        // prevents the enemy from being defeated more than once
+        if (defeated) return;
+
+        defeated = true; // marks the enemy as defeated
+
+        // plays the metal crunch sound if one has been assigned
+        if (metalSmash != null)
         {
-            return;
+            AudioSource.PlayClipAtPoint(metalSmash, transform.position);
         }
 
-        // enemy has been defeated
-        defeated = true;
+        ScoreManager.score += points; // adds points to Hank's score
 
-        // play metal crunch sound
-        AudioSource.PlayClipAtPoint(metalSmash, transform.position);
-
-        // add points to Hank's score
-        ScoreManager.score += points;
-
-        // destroy the enemy
-        Destroy(gameObject);
+        Destroy(gameObject); // removes the enemy from the scene
     }
-}
+    }

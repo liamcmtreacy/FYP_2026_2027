@@ -1,15 +1,18 @@
-
 using UnityEngine;
 
 public class SwordPickup : MonoBehaviour
 {
     public Transform holdingSword; // Where Hank holds the sword (will likely get changed a lot)
 
+    public Vector3 swordPosition; // Position of sword when picked up
+    public Vector3 swordRotation; // Rotation of sword when picked up
+
     private bool playerNearby = false; // Checks if Hank is near the sword, so can be equipped
     private bool pickedUp = false; // Checks if Hank has picked up the sword (SIMPLE T/F)
 
     void Start()
     {
+    // still empty
     }
 
     void Update()
@@ -27,10 +30,10 @@ public class SwordPickup : MonoBehaviour
         pickedUp = true;
 
         transform.SetParent(holdingSword);
-        //
+        
+        transform.localPosition = swordPosition;
+        transform.localRotation = Quaternion.Euler(swordRotation);
 
-        transform.localPosition = Vector3.zero;
-        transform.localRotation = Quaternion.identity;
         Debug.Log("SWORD PICKED UP!"); //console log for test (errors)
 
         GetComponent<Collider>().enabled = false;

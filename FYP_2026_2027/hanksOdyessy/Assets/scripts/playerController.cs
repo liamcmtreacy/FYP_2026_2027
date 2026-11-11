@@ -5,13 +5,13 @@ public class PlayerController : MonoBehaviour
     public float speed = 5f;
 
     // how high Hank can jump
-    public float jumpHeight = 2f;
+    public float jumpHeight = 4f; // made higher with taller model
 
     // gravity pulling Hank down
     public float gravity = -9.81f;
 
     // how sensitive the mouse is
-    public float mouseSensitivity = 2f;
+    //public float mouseSensitivity = 2f;
 
     // where Hank goes if he touches the floor
     public Transform spawnPoint;
@@ -23,7 +23,7 @@ public class PlayerController : MonoBehaviour
     private CharacterController controller;
 
     // keeps track of looking up and down
-    private float cameraRotation = 0f;
+    //private float cameraRotation = 0f;
 
     // This stores the camera that follows behind Hank.
     public Transform playerCamera;
@@ -43,6 +43,10 @@ public class PlayerController : MonoBehaviour
     private float nextDamageTime; 
 
     private PlayerHealthManager playerHealth; // from playerHealthmanaegr scipt i made
+
+    // new addition (good for game feel)
+    public float fallDeathHeight = -30f; // how far Hank can fall before dying
+    private bool hasFallen = false; // stops the death trigger happening repeatedly
 
 
     void Start()
@@ -64,7 +68,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // locks the mouse to the middle of the screen
-        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.lockState = CursorLockMode.None;
 
         // Finds Main Camera underneath Player if it hasn't been// assigned in the Inspector.
         if (playerCamera == null)
@@ -74,18 +78,6 @@ public class PlayerController : MonoBehaviour
             if (childCamera != null)
             {
                 playerCamera = childCamera.transform;
-            }
-        }
-
-        // starts the camera with its current up/down angle (feels kinda cinematic to me)
-        if (playerCamera != null)
-        {
-            cameraRotation = playerCamera.localEulerAngles.x;
-
-            // converts the angle to a value between -180 and 180
-            if (cameraRotation > 180f)
-            {
-                cameraRotation -= 360f;
             }
         }
     }
@@ -153,26 +145,21 @@ public class PlayerController : MonoBehaviour
         // child camera up and down.
         // MOUSE FOLLOWING/TRACKING
 
-        // looks left and right
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
 
-        // looks up and down
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
+        // REMOVED MOUSE MOVEMENT, TOO ANNOYING!!!!
 
-        // rotates Hank left and right
-        transform.Rotate(Vector3.up * mouseX);
+        // checks if Hank has fallen into a pit
+    if (!hasFallen && transform.position.y < fallDeathHeight)
+    {
+    hasFallen = true; // stops the fall death from triggering again
 
-        // changes the up and down camera angle
-        cameraRotation -= mouseY;
+    if (playerHealth != null)
+    {
+        playerHealth.TakeDamage(999f); // instantly KILLS  Hank and shows Game Over
+    }
 
-        // stops the camera looking completely upside down
-        cameraRotation = Mathf.Clamp(cameraRotation, -80f, 80f);
-
-        // rotates the camera up and down
-        if (playerCamera != null)
-        {
-            playerCamera.localRotation = Quaternion.Euler(cameraRotation, 0f, 0f);
-        }
+    return; // stops player movement
+    }
     }
 
 
@@ -237,6 +224,7 @@ public class PlayerController : MonoBehaviour
         transform.position = spawnPoint.position;
         transform.rotation = spawnPoint.rotation;
         verticalVelocity = 0f;
+        hasFallen = false; // so I didnt know for a LONG TIME, so I added this line so you can die frm falling again
 
         // turns the controller back on
         controller.enabled = true;

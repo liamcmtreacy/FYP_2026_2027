@@ -1,4 +1,3 @@
-
 using UnityEngine;                      
 
 public class PlayerHealthManager : MonoBehaviour // PlayerHealthManager != PlayerHealthmanager (I spent too long trying to fix this typo.......)
@@ -17,7 +16,7 @@ public class PlayerHealthManager : MonoBehaviour // PlayerHealthManager != Playe
     void Start()
     {
         Time.timeScale = 1f;
-
+        Debug.Log("Player started with health: " + currentHealth); // adding for test purposes
         currentHealth = maxHealth;
 
         healthbar.UpdateHealthBar(maxHealth, currentHealth);

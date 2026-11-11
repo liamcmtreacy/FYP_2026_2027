@@ -1,4 +1,5 @@
-using UnityEngine;
+
+using UnityEngine;                      
 ///https://www.youtube.com/watch?v=R2ahXdQ9krQ&list=LL&index=1 huge help
 using System.Collections.Generic;
 
@@ -13,8 +14,8 @@ public class swingAttackSword : MonoBehaviour
     // the actual sword model
     public Transform swordWeapon;
 
-    // hit radius
-    public float hitRadius = 1f;
+    // hit radius. I changed this
+    public float hitRadius = 10f; // made hitbox bigger to be more playable
 
     private bool isAttacking = false;
     private bool returning = false;
@@ -29,8 +30,8 @@ public class swingAttackSword : MonoBehaviour
 
     void Start()
     {
-        startingRotation = transform.localRotation;
-        attackRotation = startingRotation * Quaternion.Euler(0f, 0f, swingAngle);
+        startingRotation = swordWeapon.localRotation; // so now it remembers sword position
+        attackRotation = startingRotation * Quaternion.Euler(swingAngle, 0f, 0f); // does math for rotation
     }
 
     void Update()
@@ -52,11 +53,7 @@ public class swingAttackSword : MonoBehaviour
             // swings the sword forward
             if (!returning)
             {
-                transform.localRotation = Quaternion.Slerp(
-                    startingRotation,
-                    attackRotation,
-                    swingTimer / (swingDuration / 2f)
-                );
+                swordWeapon.localRotation = Quaternion.Slerp(startingRotation, attackRotation, swingTimer / (swingDuration / 2f)); // Updated
 
                 // checks for enemies during the swing
                 CheckForEnemies();
@@ -70,15 +67,11 @@ public class swingAttackSword : MonoBehaviour
             // returns the sword to its resting position
             else
             {
-                transform.localRotation = Quaternion.Slerp(
-                    attackRotation,
-                    startingRotation,
-                    swingTimer / (swingDuration / 2f)
-                );
+                swordWeapon.localRotation = Quaternion.Slerp(attackRotation, startingRotation, swingTimer / (swingDuration / 2f));
 
                 if (swingTimer >= swingDuration / 2f)
                 {
-                    transform.localRotation = startingRotation;
+                    swordWeapon.localRotation = startingRotation;
                     isAttacking = false;
                 }
             }
