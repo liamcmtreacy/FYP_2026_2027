@@ -1,6 +1,5 @@
-
-using UnityEngine;                      
-///https://www.youtube.com/watch?v=R2ahXdQ9krQ&list=LL&index=1 huge help
+using UnityEngine;
+///https://www.youtube.com/watch?v=R2ahXdQ9krQ&list=LL&index=1 huge helpS
 using System.Collections.Generic;
 
 public class swingAttackSword : MonoBehaviour
@@ -30,7 +29,7 @@ public class swingAttackSword : MonoBehaviour
 
     void Start()
     {
-        startingRotation = swordWeapon.localRotation; // so now it remembers sword position
+                startingRotation = swordWeapon.localRotation; // so now it remembers sword position
         attackRotation = startingRotation * Quaternion.Euler(swingAngle, 0f, 0f); // does math for rotation
     }
 
@@ -53,7 +52,7 @@ public class swingAttackSword : MonoBehaviour
             // swings the sword forward
             if (!returning)
             {
-                swordWeapon.localRotation = Quaternion.Slerp(startingRotation, attackRotation, swingTimer / (swingDuration / 2f)); // Updated
+                   swordWeapon.localRotation = Quaternion.Slerp(startingRotation, attackRotation, swingTimer / (swingDuration / 2f)); // Updated
 
                 // checks for enemies during the swing
                 CheckForEnemies();
