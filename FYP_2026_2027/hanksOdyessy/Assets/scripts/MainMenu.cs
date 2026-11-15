@@ -8,4 +8,14 @@ public class MainMenu : MonoBehaviour
     {
         SceneManager.LoadScene("level01"); // insert whichever game scene you want to switch too
     }
+
+    public void OpenControls()
+    {
+        SceneManager.LoadScene("controls");
+    }
+
+    public void ReturnToMenu()
+    {
+    SceneManager.LoadScene("startMenu");
+    }
 }

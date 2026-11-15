@@ -1,41 +1,57 @@
-using UnityEngine;
+using UnityEngine; // This was a huge pain to get working
+
 public class shootTargetsAtPlayer : MonoBehaviour
 {
-    // Hank 
+    // Hank
     public Transform player;
+
+    // The projectile prefab
     public GameObject projectilePrefab;
-    // Where the missile comes from
+
+    // Where the projectile comes from
     public Transform firePoint;
-    // How far away the enemy can detect Hank (will edit a lot probably)
+
+    // How far away the enemy can detect Hank
     public float detectionRange = 15f;
 
-    public float fireRate = 2f;  // How long between each shot
+    // How long between each shot
+    public float fireRate = 2f;
+
     private float nextFireTime = 0f;
 
     void Start()
     {
+        // Find Hank using the Player tag
         if (player == null)
         {
-            GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+            GameObject playerObject =
+                GameObject.FindGameObjectWithTag("Player"); // player tag
 
             if (playerObject != null)
             {
                 player = playerObject.transform;
+                Debug.Log("Enemy found Hank!"); // debug for testing
+            }
+            else
+            {
+                Debug.LogError("Could not find Hank! Check Player tag."); // same as above
             }
         }
     }
 
     void Update()
     {
-        if (player == null) return;
+        // Check that all required references exist
+        if (player == null || projectilePrefab == null || firePoint == null)
+            return;
 
-        // Checks how far away Hank is
+        // Check distance between enemy and Hank
         float distance = Vector3.Distance(transform.position, player.position);
 
-        // Checks if Hank is within shooting range
+        // Check if Hank is within shooting range
         if (distance <= detectionRange)
         {
-            // Turns towards Hank
+            // Turn towards Hank
             Vector3 direction = player.position - transform.position;
             direction.y = 0f;
 
@@ -44,7 +60,7 @@ public class shootTargetsAtPlayer : MonoBehaviour
                 transform.rotation = Quaternion.LookRotation(direction);
             }
 
-            // Checks if the enemy can shoot again
+            // Check if the enemy can shoot again
             if (Time.time >= nextFireTime)
             {
                 Shoot();
@@ -53,12 +69,18 @@ public class shootTargetsAtPlayer : MonoBehaviour
         }
     }
 
-    // Shoots a missile towards Hank
+    // Shoot a projectile towards Hank
     void Shoot()
     {
-        if (projectilePrefab == null || firePoint == null) return;
-        Vector3 direction = (player.position - firePoint.position).normalized;
-        Instantiate(projectilePrefab, firePoint.position, Quaternion.LookRotation(direction));
-        Debug.Log("Zapper fired a missile!");
+        Vector3 direction =(player.position - firePoint.position).normalized;
+
+        // Create the projectile
+        Instantiate(
+            projectilePrefab,
+            firePoint.position,
+            Quaternion.LookRotation(direction)
+        );
+
+        Debug.Log("Zapper fired a projectile!"); // final debug
     }
 }

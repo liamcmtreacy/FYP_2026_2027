@@ -1,42 +1,79 @@
 using UnityEngine;
-
 public class bulletShoot : MonoBehaviour
 {
     public float speed = 15f;
     public float damage = 1f;
     public float lifetime = 5f;
+    public float turnSpeed = 8f;
 
     private Transform player;
     private PlayerHealthManager playerHealth;
 
-   void Start()
+    void Start()
     {
-    GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
 
-    if (playerObject != null)
-    {
-        player = playerObject.transform;
-        playerHealth = playerObject.GetComponentInChildren<PlayerHealthManager>();
-    }
+        if (playerObject != null)
+        {
+            player = playerObject.transform;
 
-    Destroy(gameObject, lifetime);
+            // Find PlayerHealthManager anywhere in Hank's hierarchy
+            playerHealth = playerObject.GetComponentInParent<PlayerHealthManager>();
+
+            if (playerHealth == null)
+            {
+                playerHealth = playerObject.transform.root.GetComponentInChildren<PlayerHealthManager>(true);
+            }
+
+            Debug.Log("Player found by projectile!");
+        }
+
+        Destroy(gameObject, lifetime);
     }
 
     void Update()
     {
         if (player == null) return;
 
-        Vector3 direction = (player.position - transform.position).normalized;
-        transform.position += direction * speed * Time.deltaTime;
+        // Aim towards Hank's body
+        Vector3 targetPosition = player.position + Vector3.up * 1f;
+        Vector3 direction = (targetPosition - transform.position).normalized;
+
+        // Smoothly rotate towards Hank
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            targetRotation,
+            turnSpeed * Time.deltaTime
+        );
+
+        // Move forwards
+        transform.position += transform.forward * speed * Time.deltaTime;
     }
 
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
+{
+    // Check if the bullet collided with Hank
+    if (other.CompareTag("Player"))
+    {
+        Debug.Log("BULLET HIT HANK!");
+
+        // Find PlayerHealthManager on Hank
+        PlayerHealthManager healthManager = other.GetComponent<PlayerHealthManager>();
+
+        if (healthManager != null)
         {
-            if (other.transform.root.CompareTag("Player") && playerHealth != null)
-        {
-            playerHealth.TakeDamage(damage);
-            Debug.Log("BULLET COLLISION DETECTED!"); // please work
-            Destroy(gameObject);
+            healthManager.TakeDamage(damage);
+            Debug.Log("Damage applied: " + damage);
         }
+        else
+        {
+            Debug.LogError("PlayerHealthManager NOT FOUND!");
+        }
+
+        // Destroy bullet after hitting Hank
+        Destroy(gameObject);
     }
+}
 }

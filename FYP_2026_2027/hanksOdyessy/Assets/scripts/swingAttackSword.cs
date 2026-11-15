@@ -13,8 +13,8 @@ public class swingAttackSword : MonoBehaviour
     // the actual sword model
     public Transform swordWeapon;
 
-    // hit radius. I changed this
-    public float hitRadius = 10f; // made hitbox bigger to be more playable
+    // hit radius. I changed this, A LOT
+    public float hitRadius = 32f; // made hitbox bigger to be more playable
 
     private bool isAttacking = false;
     private bool returning = false;

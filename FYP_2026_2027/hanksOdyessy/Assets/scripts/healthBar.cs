@@ -18,10 +18,6 @@ public class Healthbar : MonoBehaviour
     // give a feel of polish with the health bar decreasing
     void Update()
     {
-            healthBar.fillAmount = Mathf.MoveTowards(
-            healthBar.fillAmount,
-            target,
-            reduceSpeed * Time.unscaledDeltaTime
-        );
+        healthBar.fillAmount = Mathf.MoveTowards(healthBar.fillAmount,target,reduceSpeed * Time.unscaledDeltaTime);
     }
 }
