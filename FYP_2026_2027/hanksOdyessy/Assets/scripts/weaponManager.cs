@@ -35,8 +35,7 @@ public class WeaponManager : MonoBehaviour
     public void CollectGun()
     {
         hasGun = true;
-        EquipGun();
-
+        EquipGun(); // function call
         Debug.Log("Gun collected, idea is to Press 1 for sword or 2 for gun.");
     }
 
