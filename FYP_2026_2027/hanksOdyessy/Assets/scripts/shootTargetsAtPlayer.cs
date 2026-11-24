@@ -1,7 +1,17 @@
-using UnityEngine; // This was a huge pain to get working
+using UnityEngine;
 
 public class shootTargetsAtPlayer : MonoBehaviour
 {
+    // Enemy health and points
+    public int points = 100;
+    public int health = 2;
+
+    // Metal crunch sound
+    public AudioClip metalSmash;
+
+    // Stops the enemy being defeated more than once
+    private bool defeated = false;
+
     // Hank
     public Transform player;
 
@@ -25,28 +35,32 @@ public class shootTargetsAtPlayer : MonoBehaviour
         if (player == null)
         {
             GameObject playerObject =
-                GameObject.FindGameObjectWithTag("Player"); // player tag
+                GameObject.FindGameObjectWithTag("Player");
 
             if (playerObject != null)
             {
                 player = playerObject.transform;
-                Debug.Log("Enemy found Hank!"); // debug for testing
+                Debug.Log("Enemy found Hank!");
             }
             else
             {
-                Debug.LogError("Could not find Hank! Check Player tag."); // same as above
+                Debug.LogError("Could not find Hank! Check Player tag.");
             }
         }
     }
 
     void Update()
     {
+        // Stops the enemy shooting if defeated
+        if (defeated) return;
+
         // Check that all required references exist
         if (player == null || projectilePrefab == null || firePoint == null)
             return;
 
         // Check distance between enemy and Hank
-        float distance = Vector3.Distance(transform.position, player.position);
+        float distance = Vector3.Distance(
+            transform.position, player.position);
 
         // Check if Hank is within shooting range
         if (distance <= detectionRange)
@@ -73,14 +87,45 @@ public class shootTargetsAtPlayer : MonoBehaviour
     void Shoot()
     {
         Vector3 direction =(player.position - firePoint.position).normalized;
-
         // Create the projectile
-        Instantiate(
-            projectilePrefab,
-            firePoint.position,
-            Quaternion.LookRotation(direction)
-        );
+        Instantiate(projectilePrefab,firePoint.position,Quaternion.LookRotation(direction));
+        Debug.Log("Zapper fired a projectile!");
+    }
 
-        Debug.Log("Zapper fired a projectile!"); // final debug
+    // Takes damage from Hank's sword
+    public void TakeSwordDamage(int damage)
+    {
+        // Ignores damage if already defeated or damage is invalid
+        if (defeated || damage <= 0) return;
+
+        // Removes health from the enemy
+        health -= damage;
+
+        // Defeats the enemy when health reaches zero
+        if (health <= 0)
+        {
+            Defeat();
+        }
+    }
+
+    // Defeats the shooting enemy (taken from enemy.cs)
+    public void Defeat()
+    {
+        // Prevents the enemy being defeated more than once
+        if (defeated) return;
+
+        defeated = true;
+
+        // Plays the metal crunch sound
+        if (metalSmash != null)
+        {
+            AudioSource.PlayClipAtPoint(metalSmash, transform.position);
+        }
+
+        // Adds points to Hank's score
+        ScoreManager.score += points;
+
+        // Removes the enemy from the scene
+        Destroy(gameObject);
     }
 }

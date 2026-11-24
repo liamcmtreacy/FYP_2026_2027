@@ -167,42 +167,65 @@ public class PlayerController : MonoBehaviour
 
         // ENEMY COLLISION
 
-    void OnControllerColliderHit(ControllerColliderHit hit)
+    
+// ENEMY COLLISION
+void OnControllerColliderHit(ControllerColliderHit hit) // HAD TO REWRITE WITH THE SHOOTER ENEMY NOW BEING ABLE TO BE KILLED
+{
+    // Looks for both types of enemy
+    Enemy enemy = hit.collider.GetComponentInParent<Enemy>();
+    shootTargetsAtPlayer shooter = hit.collider.GetComponentInParent<shootTargetsAtPlayer>();
+    // Checks if Hank hit either type of enemy
+    if (enemy != null || shooter != null)
     {
-        // Looks for an Enemy script on whatever Hank hit
-        Enemy enemy = hit.collider.GetComponentInParent<Enemy>();
-
-        // Checks if Hank actually hit an enemy
-        if (enemy != null)
+        // Checks if Hank is falling onto the enemy
+        if (verticalVelocity < 0f && hit.normal.y > 0.5f)
         {
-            // Checks if Hank is falling and hitting the top of the enemy
-            if (verticalVelocity < 0f && hit.normal.y > 0.5f)
+            // Defeats the normal enemy
+            if (enemy != null)
             {
-                // Hank jumped on the enemy
                 enemy.Defeat();
-
-                // Makes Hank bounce after landing on the enemy
-                verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
             }
-            else if (Time.time >= nextDamageTime)
-            {
-                // Hank Takes Damage
-                if (playerHealth != null)
-                {
-                    playerHealth.TakeDamage(1f);
-                }
 
-                // Calculates Knockback Direction
-                Vector3 knockbackDirection = transform.position - enemy.transform.position;
+            // Defeats the shooting enemy
+            else if (shooter != null)
+            {
+                shooter.Defeat();
+            }
+
+            // Makes Hank bounce after defeating the enemy
+            verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        }
+        else if (Time.time >= nextDamageTime)
+        {
+            // Hank takes damage
+            if (playerHealth != null)
+            {
+                playerHealth.TakeDamage(1f);
+            }
+
+            // Gets the position of whichever enemy Hank hit
+            Vector3 enemyPosition;
+
+            if (enemy != null)
+            {
+                enemyPosition = enemy.transform.position;
+            }
+            else
+            {
+                enemyPosition = shooter.transform.position;
+            }
+
+                // Calculates knockback direction
+                Vector3 knockbackDirection =transform.position - enemyPosition;
 
                 knockbackDirection.y = 0f;
 
                 knockbackDirection.Normalize();
 
-                // Pushes Hank Away From Enemy
+                // Pushes Hank away from the enemy
                 knockbackVelocity = knockbackDirection * knockbackForce;
 
-                // Sets Damage Cooldown
+                //Sets damage cooldown
                 nextDamageTime = Time.time + damageCooldown;
             }
         }
