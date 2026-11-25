@@ -12,7 +12,7 @@ public class floorManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
         {
             // finds Hank's movement script
-            player = FindFirstObjectByType<PlayerController>();
+            player = FindAnyObjectByType<PlayerController>();
 
             // sends Hank back to the spawn point
             if (player != null)

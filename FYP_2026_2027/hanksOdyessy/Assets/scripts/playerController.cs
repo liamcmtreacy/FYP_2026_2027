@@ -2,10 +2,10 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     // how fast Hank moves
-    public float speed = 5f;
+    public float speed = 10f;
 
     // how high Hank can jump
-    public float jumpHeight = 4f; // made higher with taller model
+    public float jumpHeight = 14f; // made higher with taller model
 
     // gravity pulling Hank down
     public float gravity = -9.81f;
